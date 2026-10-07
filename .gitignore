@@ -1,0 +1,23 @@
+# ROS 2
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+
+# FreeCAD (archivos de respaldo)
+*.FCStd1
+*.FCStd2
+*.bck
+
+# PlatformIO / KiCad
+.pio/
+*.kicad_prl
+*.kicad_bak
+fp-info-cache
+
+# OS
+.DS_Store
+Thumbs.db

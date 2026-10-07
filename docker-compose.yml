@@ -1,0 +1,19 @@
+services:
+  ros2_dev:
+    build: .
+    container_name: taller_torreta
+    tty: true          # <--- Mantiene la terminal activa
+    stdin_open: true   # <--- Mantiene la entrada de datos abierta
+    environment:
+      - DISPLAY=${DISPLAY}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+      - PULSE_SERVER=${PULSE_SERVER}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /mnt/wslg:/mnt/wslg:rw
+      - ./workspace:/torreta_ws
+    devices:
+      - /dev/dxg:/dev/dxg
+    privileged: true
+    working_dir: /torreta_ws
