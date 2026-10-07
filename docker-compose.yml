@@ -12,7 +12,7 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /mnt/wslg:/mnt/wslg:rw
-      - ./workspace:/torreta_ws
+      - .:/torreta_ws  # <--- CORREGIDO: Toma la carpeta actual y la pone en /torreta_ws
     devices:
       - /dev/dxg:/dev/dxg
     privileged: true
