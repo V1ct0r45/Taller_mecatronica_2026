@@ -2,7 +2,7 @@ FROM osrf/ros:jazzy-desktop-full
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Instalar herramientas básicas y librerías gráficas
+# 1. Instalar herramientas básicas, librerías gráficas, Arduino y puertos virtuales
 RUN apt-get update && apt-get install -y \
     curl \
     gpg \
@@ -12,13 +12,19 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     git \
     software-properties-common \
+    arduino \
+    arduino-core \
+    gcc-avr \
+    avr-libc \
+    avrdude \
+    socat \
+    python3-serial \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Agregar PPA e instalar KiCad
-RUN add-apt-repository ppa:kicad/kicad-8.0-releases -y \
-    && apt-get update && apt-get install -y \
-    kicad \
-    && rm -rf /var/lib/apt/lists/*
+# 2. Instalar KiCad 10.0 desde el repositorio oficial
+RUN add-apt-repository --yes ppa:kicad/kicad-10.0-releases \
+    && apt-get update \
+    && apt-get install -y kicad
 
 # 3. Instalar FreeCAD vía AppImage extraído (Descarga dinámica)
 RUN LATEST_URL=$(curl -s https://api.github.com/repos/FreeCAD/FreeCAD/releases/latest | grep "browser_download_url" | grep "Linux-x86_64" | grep "AppImage" | head -n 1 | cut -d '"' -f 4) \
@@ -57,8 +63,11 @@ RUN SIMULIDE_URL=$(curl -sL https://launchpad.net/simulide/+download | grep -o '
     && ln -s "$SIMULIDE_DIR/squashfs-root/AppRun" /usr/local/bin/simulide
 # 6. Instalar PlatformIO
 RUN pip3 install --break-system-packages -U platformio
+RUN mkdir -p /root/.local/share/FreeCAD/Mod \
+    && git clone https://github.com/kbwbe/A2plus.git /root/.local/share/FreeCAD/Mod/A2plus
 
 # 7. Configurar el entorno automático de ROS 2
 RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+
 
 CMD ["bash"]
