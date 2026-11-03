@@ -48,6 +48,19 @@ def generate_launch_description():
             '-z', '0.0' 
         ]
     )
+    
+    load_joint_state_broadcaster = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster"],
+    )
+
+    # 2. Arrancar el controlador de posición de los motores
+    load_pan_tilt_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["pan_tilt_controller"],
+    )
 
     return LaunchDescription([
         set_env_gazebo_model,

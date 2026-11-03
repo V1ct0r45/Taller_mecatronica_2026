@@ -2,7 +2,7 @@
 <robot name="torreta_pan_tilt" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ========================================== -->
-  <!-- MUNDO Y ANCLAJE (Para que no caiga al vacío)-->
+  <!-- MUNDO Y ANCLAJE -->
   <!-- ========================================== -->
   <link name="world"/>
 
@@ -13,13 +13,12 @@
   </joint>
 
   <!-- ========================================== -->
-  <!-- BASE FIXA (El soporte estático)            -->
+  <!-- BASE ESTÁTICA -->
   <!-- ========================================== -->
   <link name="base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <!-- Revisa que en tu carpeta meshes el archivo se llame exactamente Base_link.stl (con B mayúscula) -->
         <mesh filename="package://turret_description/meshes/Base_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="dark_grey">
@@ -40,22 +39,21 @@
   </link>
 
   <!-- ========================================== -->
-  <!-- ARTICULACIÓN 1: PAN (Giro Horizontal)      -->
+  <!-- MOTOR 1: PAN (Giro Horizontal) -->
   <!-- ========================================== -->
   <joint name="pan_joint" type="revolute">
     <parent link="base_link"/>
     <child link="pan_link"/>
     <origin xyz="0 -0.01014 0.123" rpy="0 0 0"/> 
     <axis xyz="0 0 1"/>
-    <limit lower="-1.5708" upper="1.5708" effort="2.0" velocity="1.0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="1.0" velocity="1.5"/>
   </joint>
 
   <!-- ========================================== -->
-  <!-- ESLABÓN 1 (La pieza en U / Eslabon1_link)  -->
+  <!-- ESLABÓN 1 (Pieza azul en U) -->
   <!-- ========================================== -->
   <link name="pan_link">
     <visual>
-      <!-- RECORREMOS LA PIEZA HACIA ABAJO PARA COMPENSAR FREECAD -->
       <origin xyz="0 0 -0.123" rpy="0 0 0"/>
       <geometry>
         <mesh filename="package://turret_description/meshes/Eslabon1_link.stl" scale="0.001 0.001 0.001"/>
@@ -64,21 +62,98 @@
         <color rgba="0.0 0.4 0.8 1.0"/>
       </material>
     </visual>
-
     <collision>
-      <!-- Centroides ajustados a la nueva altura -->
       <origin xyz="0 0.039 0.095" rpy="0 0 0"/> 
       <geometry>
         <box size="0.100 0.118 0.190"/> 
       </geometry>
     </collision>
-
     <inertial>
-      <!-- Centro de masa ajustado a la nueva altura -->
       <origin xyz="0 0.035 0.085" rpy="0 0 0"/> 
       <mass value="0.142"/> 
       <inertia ixx="0.00059" ixy="0.0" ixz="0.0" iyy="0.00054" iyz="0.0" izz="0.00027"/>
     </inertial>
   </link>
+
+<!-- ========================================== -->
+  <!-- MOTOR 2: TILT (Cabeceo Vertical) -->
+  <!-- ========================================== -->
+  <joint name="tilt_joint" type="revolute">
+    <parent link="pan_link"/>
+    <child link="tilt_link"/>
+    
+    <!-- Tus medidas exactas extraídas de FreeCAD, convertidas a metros -->
+    <origin xyz="0.02998 0.01895 0.11577" rpy="0 0 0"/> 
+    
+    <!-- El eje Y suele ser el correcto para el cabeceo (arriba/abajo) -->
+    <axis xyz="1 0 0"/> 
+    <limit lower="-1.5708" upper="1.5708" effort="1.0" velocity="1.5"/>
+  </joint>
+
+
+ <!-- ========================================== -->
+  <!-- ESLABÓN 2 (Soporte de la cámara) -->
+  <!-- ========================================== -->
+  <link name="tilt_link">
+    <visual>
+      <!-- COMPENSACIÓN: Restamos la distancia absoluta para bajar la malla -->
+      <origin xyz="-0.029 -0.02209 -0.239" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://turret_description/meshes/Eslabon_2_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <!-- IMPORTANTE: La colisión debe tener exactamente la misma compensación -->
+      <origin xyz="-0.029 -0.02209 -0.239" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://turret_description/meshes/Eslabon_2_link.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    
+    <inertial>
+      <!-- El centro de masa se queda igual (relativo a su propio origen) -->
+      <origin xyz="-0.02813 -0.04462 0.04276" rpy="0 0 0"/> 
+      <mass value="0.050"/> <!-- RECUERDA: Poner el peso real aquí en KG -->
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- ========================================== -->
+  <!-- SISTEMA DE CONTROL (Músculos virtuales) -->
+  <!-- ========================================== -->
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <!-- Motor base -->
+    <joint name="pan_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <!-- Motor superior -->
+    <joint name="tilt_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+
+  <!-- ========================================== -->
+  <!-- PLUGIN DE GAZEBO -->
+  <!-- ========================================== -->
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>/torreta_ws/torreta/ros2_ws/install/turret_description/share/turret_description/config/controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
 
 </robot>

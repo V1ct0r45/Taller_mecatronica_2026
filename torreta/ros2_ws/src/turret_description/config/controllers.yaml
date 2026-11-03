@@ -1,0 +1,21 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    pan_tilt_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+pan_tilt_controller:
+  ros__parameters:
+    joints:
+      - pan_joint
+      - tilt_joint
+    interface_name: position
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity

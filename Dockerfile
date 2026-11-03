@@ -70,4 +70,12 @@ RUN mkdir -p /root/.local/share/FreeCAD/Mod \
 RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 
 
+# 8. Instalar herramientas de simulación y control para ROS 2 (Gazebo y URDF)
+RUN apt-get update && apt-get install -y \
+    ros-jazzy-joint-state-publisher-gui \
+    ros-jazzy-gz-ros2-control \
+    ros-jazzy-ros2-control \
+    ros-jazzy-ros2-controllers \
+    && rm -rf /var/lib/apt/lists/*
+
 CMD ["bash"]
