@@ -26,7 +26,8 @@ setup(
         'console_scripts': [
             # Formato: 'nombre_comando = carpeta_paquete.nombre_archivo_python:main'
             'color_tracker = turret_pkg.color_tracker:main',
-            'target_mover = turret_pkg.target_mover:main'
+            'target_mover = turret_pkg.target_mover:main',
+            'turret_teleop = turret_pkg.turret_teleop:main'
         ],
     },
 )

@@ -82,10 +82,8 @@
     <parent link="pan_link"/>
     <child link="tilt_link"/>
     
-    <!-- Tus medidas exactas extraídas de FreeCAD, convertidas a metros -->
     <origin xyz="0.02998 0.01895 0.11577" rpy="0 0 0"/> 
     
-    <!-- El eje Y suele ser el correcto para el cabeceo (arriba/abajo) -->
     <axis xyz="1 0 0"/> 
     <limit lower="-1.5708" upper="1.5708" effort="1.0" velocity="1.5"/>
   </joint>
@@ -96,31 +94,103 @@
   <!-- ========================================== -->
   <link name="tilt_link">
     <visual>
-      <!-- COMPENSACIÓN: Restamos la distancia absoluta para bajar la malla -->
-      <origin xyz="-0.029 -0.02209 -0.239" rpy="0 0 0"/>
+
+      <origin xyz="-0.029 -0.02209 -0.239" rpy="0 0 -0.15"/>
       <geometry>
         <mesh filename="package://turret_description/meshes/Eslabon_2_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="grey">
-        <color rgba="0.5 0.5 0.5 1.0"/>
+        <color rgba="0.0 0.0 0.5 1.0"/>
       </material>
     </visual>
     
     <collision>
-      <!-- IMPORTANTE: La colisión debe tener exactamente la misma compensación -->
-      <origin xyz="-0.029 -0.02209 -0.239" rpy="0 0 0"/>
+
+      <origin xyz="-0.029 -0.02209 -0.239" rpy="0 0 -0.15"/>
       <geometry>
         <mesh filename="package://turret_description/meshes/Eslabon_2_link.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     
     <inertial>
-      <!-- El centro de masa se queda igual (relativo a su propio origen) -->
+
       <origin xyz="-0.02813 -0.04462 0.04276" rpy="0 0 0"/> 
-      <mass value="0.050"/> <!-- RECUERDA: Poner el peso real aquí en KG -->
+      <mass value="0.070"/> 
       <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
     </inertial>
   </link>
+
+  <!-- ========================================== -->
+  <!-- ESLABÓN 3: CÁMARA (Modelo 3D) -->
+  <!-- ========================================== -->
+  <link name="camera_link">
+    <visual>
+      <origin xyz="-0.015 -0.012 -0.12" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://turret_description/meshes/Camera.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    
+    <!-- Colisión simplificada (una caja invisible) para no sobrecargar el CPU simulando la forma compleja del STL -->
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.03 0.03 0.03"/> 
+      </geometry>
+    </collision>
+    
+    <!-- Peso de la cámara (aprox 50 gramos). Esto afectará la inercia total, haciendo la física aún más realista -->
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.050"/> 
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <!-- ========================================== -->
+  <!-- ARTICULACIÓN DE LA CÁMARA (Fija) -->
+  <!-- ========================================== -->
+  <joint name="camera_joint" type="fixed">
+    <parent link="tilt_link"/>
+    <child link="camera_link"/>
+    <origin xyz="-0.015 -0.012 -0.12" rpy="0 0 0"/> 
+  </joint>
+
+  <!-- ========================================== -->
+  <!-- SENSOR VIRTUAL DE GAZEBO -->
+  <!-- ========================================== -->
+  <gazebo reference="camera_link">
+    <sensor name="torreta_camera" type="camera">
+      <!-- Si al abrir la cámara en ROS 2 la imagen está volteada o viendo de lado, ajusta el rpy aquí -->
+      <pose>0 0 0 0 0 0</pose> 
+      <visualize>true</visualize> <!-- Muestra un cono rojo indicando hacia dónde ve -->
+      <update_rate>30.0</update_rate>
+      <camera>
+        <horizontal_fov>1.57</horizontal_fov> 
+        <image>
+          <format>R8G8B8</format>
+          <width>1920</width>
+          <height>1080</height>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far> <!-- Rango de visión: de 5 cm a 8 metros -->
+        </clip>
+      </camera>
+      <topic>/camera/image_raw</topic>
+      <gz_frame_id>camera_link</gz_frame_id>
+    </sensor>
+  </gazebo>
+
+  <!-- Plugin indispensable para que Gazebo Harmonic procese los fotogramas del sensor -->
+  <gazebo>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+  </gazebo>
 
   <!-- ========================================== -->
   <!-- SISTEMA DE CONTROL (Músculos virtuales) -->

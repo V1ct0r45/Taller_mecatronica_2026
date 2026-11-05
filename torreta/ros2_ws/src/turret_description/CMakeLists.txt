@@ -24,7 +24,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# Esto le dice a ROS 2 que copie estas 3 carpetas a la instalación final
+# Esto le dice a ROS 2 que copie las carpetas a la instalación final
 install(DIRECTORY
   launch
   urdf
