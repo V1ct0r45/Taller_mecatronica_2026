@@ -66,13 +66,13 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 5. CONTROLADOR DE ESTADOS
+# 5. CONTROLADOR DE ESTADOS
     load_joint_state_broadcaster = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
     )
-    delay_broadcaster = TimerAction(period=5.0, actions=[load_joint_state_broadcaster])
+    delay_broadcaster = TimerAction(period=15.0, actions=[load_joint_state_broadcaster])
 
     # 6. CONTROLADOR DE MOTORES
     load_pan_tilt_controller = Node(
@@ -80,7 +80,7 @@ def generate_launch_description():
         executable="spawner",
         arguments=["pan_tilt_controller", "--controller-manager", "/controller_manager"],
     )
-    delay_controller = TimerAction(period=7.0, actions=[load_pan_tilt_controller])
+    delay_controller = TimerAction(period=18.0, actions=[load_pan_tilt_controller])
 
     return LaunchDescription([
         set_env_gazebo_model,

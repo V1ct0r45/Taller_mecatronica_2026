@@ -9,6 +9,7 @@ import sys
 import termios
 import tty
 import select
+import time  # <-- Librería nativa para usar el reloj real de tu computadora
 
 class TurretTeleop(Node):
     def __init__(self):
@@ -22,8 +23,8 @@ class TurretTeleop(Node):
         self.tilt_pos = 0.0
         self.step = 0.05 
         
-        # NUEVO: Guardar el último momento en que publicamos para evitar saturación de comandos
-        self.last_pub_time = self.get_clock().now()
+        # Guardamos el tiempo usando el reloj real (time.time()) en lugar del reloj de simulación
+        self.last_pub_time = time.time()
         
         print("========================================")
         print("🎮 NODO DE CONTROL (MOVIMIENTO FLUIDO)")
@@ -33,10 +34,9 @@ class TurretTeleop(Node):
         print("========================================")
 
     def process_twist(self, twist_msg):
-        # FILTRO DE FRECUENCIA: Solo permite enviar una orden cada 0.1 segundos. 
-        # Esto soluciona el problema de mantener la tecla presionada.
-        current_time = self.get_clock().now()
-        if (current_time - self.last_pub_time).nanoseconds < 100000000: 
+        # 1. FILTRO CON TIEMPO REAL (PC) para evitar que el teclado se congele con el lag de Gazebo
+        current_time = time.time()
+        if (current_time - self.last_pub_time) < 0.1: 
             return 
         self.last_pub_time = current_time
 
@@ -52,14 +52,15 @@ class TurretTeleop(Node):
             self.pan_pos -= self.step 
 
         # LÍMITES DE SEGURIDAD FÍSICOS
-        # La base gira libre de -90 a 90 grados
         self.pan_pos = max(-1.5708, min(1.5708, self.pan_pos))
-        # El cabeceo lo topamos en -0.75 rad hacia atrás para que no choque con la pieza azul
         self.tilt_pos = max(-0.75, min(1.2, self.tilt_pos)) 
 
-        # Empaquetar y enviar el comando
+        # 2. Empaquetar y enviar el comando
         traj_msg = JointTrajectory()
         traj_msg.joint_names = ['pan_joint', 'tilt_joint']
+        
+        # ¡LÍNEA VITAL QUE SALVA AL CONTROLADOR DEL CRASH!
+        # Le damos la hora oficial de Gazebo al mensaje.
         traj_msg.header.stamp = self.get_clock().now().to_msg()
         
         point = JointTrajectoryPoint()
