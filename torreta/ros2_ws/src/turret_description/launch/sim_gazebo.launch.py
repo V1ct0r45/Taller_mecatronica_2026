@@ -78,6 +78,15 @@ def generate_launch_description():
         executable="spawner",
         arguments=["pan_tilt_controller", "--controller-manager", "/controller_manager"],
     )
+    
+    # 7. PUENTE HACIA EL ARDUINO NANO
+    arduino_bridge_node = Node(
+    package='turret_pkg',
+    executable='arduino_bridge',
+    name='arduino_bridge',
+    output='screen',
+    parameters=[{'port': '/dev/ttyUSB0', 'baudrate': 115200}]
+    )
 
     # =========================================================================
     # EVENTOS DE CADENA (Secuencia de inicio estricta)

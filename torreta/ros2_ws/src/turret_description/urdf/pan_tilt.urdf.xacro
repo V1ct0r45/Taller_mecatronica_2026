@@ -142,7 +142,7 @@
     <parent link="camera_link"/>
     <child link="camera_link_optical"/>
     <!-- Compensación exacta para que Z (Azul) apunte al frente -->
-    <origin xyz="0 0 0" rpy="1.5708 0 3.1416"/>
+    <origin xyz="0 0 0" rpy="1.5708 0 -3.1416"/>
   </joint>
 
   <!-- ========================================== -->
