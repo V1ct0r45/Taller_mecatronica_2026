@@ -29,7 +29,6 @@ install(DIRECTORY
   launch
   urdf
   meshes
-  worlds
   config
   DESTINATION share/${PROJECT_NAME}
 )
