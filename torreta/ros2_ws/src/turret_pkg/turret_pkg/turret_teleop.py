@@ -9,7 +9,7 @@ import sys
 import termios
 import tty
 import select
-import time  # <-- Librería nativa para usar el reloj real de tu computadora
+import time  
 
 class TurretTeleop(Node):
     def __init__(self):
@@ -27,7 +27,7 @@ class TurretTeleop(Node):
         self.last_pub_time = time.time()
         
         print("========================================")
-        print("🎮 NODO DE CONTROL (MOVIMIENTO FLUIDO)")
+        print(" NODO DE CONTROL (MOVIMIENTO FLUIDO)")
         print("Usa las FLECHAS del teclado para moverla.")
         print("Mantenlas presionadas para movimiento continuo.")
         print("Presiona Ctrl+C para salir.")

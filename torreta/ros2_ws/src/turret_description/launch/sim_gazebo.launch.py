@@ -21,6 +21,9 @@ def generate_launch_description():
 
     xacro_file = os.path.join(pkg_share, 'urdf', 'pan_tilt.urdf.xacro')
     
+    # Ruta hacia tu mundo personalizado en la carpeta worlds/
+    world_file = os.path.join(pkg_share, 'worlds', 'taller_world.sdf')
+    
     # 1. ROBOT STATE PUBLISHER
     robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -33,13 +36,13 @@ def generate_launch_description():
         }]
     )
 
-    # 2. GAZEBO
+    # 2. GAZEBO (Cargando tu mundo personalizado)
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
         ),
         launch_arguments={
-            'gz_args': 'empty.sdf -r -v 3'
+            'gz_args': f'{world_file} -r -v 3'
         }.items()
     )
 
@@ -81,18 +84,17 @@ def generate_launch_description():
     
     # 7. PUENTE HACIA EL ARDUINO NANO
     arduino_bridge_node = Node(
-    package='turret_pkg',
-    executable='arduino_bridge',
-    name='arduino_bridge',
-    output='screen',
-    parameters=[{'port': '/dev/ttyUSB0', 'baudrate': 115200}]
+        package='turret_pkg',
+        executable='arduino_bridge',
+        name='arduino_bridge',
+        output='screen',
+        parameters=[{'port': '/dev/ttyUSB0', 'baudrate': 115200}]
     )
 
     # =========================================================================
     # EVENTOS DE CADENA (Secuencia de inicio estricta)
     # =========================================================================
     
-    # Iniciar el broadcaster SOLO cuando el spawn_entity haya terminado
     delay_broadcaster_after_spawn = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=spawn_entity,
@@ -100,7 +102,6 @@ def generate_launch_description():
         )
     )
 
-    # Iniciar el controlador de motores SOLO cuando el broadcaster haya terminado de configurarse
     delay_controller_after_broadcaster = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=load_joint_state_broadcaster,
@@ -114,6 +115,6 @@ def generate_launch_description():
         gazebo,
         spawn_entity,
         clock_bridge,
-        delay_broadcaster_after_spawn,
-        delay_controller_after_broadcaster
+        #delay_broadcaster_after_spawn, # <-- Descomentar para control con ros
+        #delay_controller_after_broadcaster # <-- Descomentar para control con ros
     ])

@@ -30,6 +30,7 @@ install(DIRECTORY
   urdf
   meshes
   config
+  worlds
   DESTINATION share/${PROJECT_NAME}
 )
 ament_package()

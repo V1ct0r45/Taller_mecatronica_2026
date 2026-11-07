@@ -61,14 +61,14 @@ RUN SIMULIDE_URL=$(curl -sL https://launchpad.net/simulide/+download | grep -o '
     && chmod +x simulide \
     && ./simulide --appimage-extract \
     && ln -s "$SIMULIDE_DIR/squashfs-root/AppRun" /usr/local/bin/simulide
-# 6. Instalar PlatformIO
+
+# 6. Instalar PlatformIO y plugin de FreeCAD
 RUN pip3 install --break-system-packages -U platformio
 RUN mkdir -p /root/.local/share/FreeCAD/Mod \
     && git clone https://github.com/kbwbe/A2plus.git /root/.local/share/FreeCAD/Mod/A2plus
 
 # 7. Configurar el entorno automático de ROS 2
 RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-
 
 # 8. Instalar herramientas de simulación y control para ROS 2 (Gazebo y URDF)
 RUN apt-get update && apt-get install -y \
@@ -77,5 +77,8 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-ros2-control \
     ros-jazzy-ros2-controllers \
     && rm -rf /var/lib/apt/lists/*
+
+# 9. Instalar dependencias de IA y Visión Artificial (YOLO)
+RUN pip3 install ultralytics --break-system-packages --ignore-installed numpy
 
 CMD ["bash"]
