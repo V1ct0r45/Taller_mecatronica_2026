@@ -62,7 +62,6 @@
         <color rgba="0.0 0.4 0.8 1.0"/>
       </material>
     </visual>
-
     <inertial>
       <origin xyz="-0.00130 0.00515 0.06382" rpy="0 0 0"/> 
       <mass value="0.142"/> 
@@ -71,38 +70,31 @@
   </link>
 
   <!-- ========================================== -->
-  <!-- MOTOR 2: TILT (Cabeceo Vertical) -->
+  <!-- RETO DEL TALLER: MOTOR 2 (TILT) Y ESLABÓN 2 -->
   <!-- ========================================== -->
-  <joint name="tilt_joint" type="revolute">
-    <parent link="pan_link"/>
-    <child link="tilt_link"/>
-    <origin xyz="0.03008 0.01895 0.11477" rpy="0 0 0"/> 
-    <axis xyz="1 0 0"/> 
-    <limit lower="-1.5708" upper="1.5708" effort="10.0" velocity="1.5"/>
-  </joint>
+  <!-- 
+    INSTRUCCIONES PARA LOS ALUMNOS:
+    Rellena las etiquetas <joint> y <link> utilizando exclusivamente estos datos provistos:
+
+    1. ARTICULACIÓN (tilt_joint):
+       - parent: pan_link
+       - child: tilt_link
+       - origin (xyz rpy): xyz="0.03008 0.01895 0.11477" rpy="0 0 0"
+       - axis: xyz="1 0 0"
+       - limit (lower upper effort velocity): lower="-1.5708" upper="1.5708" effort="10.0" velocity="1.5"
+
+    2. ESLABÓN (tilt_link):
+       - visual mesh: Eslabon_2_link.stl (escala 0.001 0.001 0.001)
+       - visual origin (xyz rpy): xyz="0 -0.006 0.006" rpy="0 0 0"
+       - inertial mass: 0.070
+       - inertial origin (xyz rpy): xyz="-0.02813 -0.04462 0.04276" rpy="0 0 0"
+       - inertial matrix (ixx iyy izz): ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"
+  -->
+  <!-- ESCRIBE TU CÓDIGO AQUÍ ABAJO: -->
+
+
 
   <!-- ========================================== -->
-  <!-- ESLABÓN 2 (Soporte de la cámara) -->
-  <!-- ========================================== -->
-  <link name="tilt_link">
-    <visual>
-      <origin xyz="0 -0.006 0.006" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://turret_description/meshes/Eslabon_2_link.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-      <material name="grey">
-        <color rgba="0.0 0.0 0.5 1.0"/>
-      </material>
-    </visual>
-     
-    <inertial>
-      <origin xyz="-0.02813 -0.04462 0.04276" rpy="0 0 0"/> 
-      <mass value="0.070"/> 
-      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
-    </inertial>
-  </link>
-
- <!-- ========================================== -->
   <!-- ARTICULACIÓN DE LA CÁMARA (Fija) -->
   <!-- ========================================== -->
   <joint name="camera_joint" type="fixed">
@@ -131,20 +123,14 @@
     </inertial>
   </link>
 
-  <!-- ========================================== -->
-  <!-- NUEVO: ESLABÓN ÓPTICO (Rotación para OpenCV) -->
-  <!-- ========================================== -->
-  <link name="camera_link_optical"></link>
-
+  <!-- Elementos ópticos y plugins de Gazebo ya precargados -->
+  <link name="camera_link_optical"/>
   <joint name="camera_optical_joint" type="fixed">
     <parent link="camera_link"/>
     <child link="camera_link_optical"/>
     <origin xyz="0 0 0" rpy="1.5708 0 -3.1416"/>
   </joint>
 
-  <!-- ========================================== -->
-  <!-- SENSOR VIRTUAL DE GAZEBO -->
-  <!-- ========================================== -->
   <gazebo reference="camera_link">
     <sensor name="torreta_camera" type="camera">
       <pose>0 0 0 0 0 0</pose> 
@@ -173,57 +159,22 @@
     </plugin>
   </gazebo>
 
-  <!-- ========================================== -->
-  <!-- PLUGINS NATIVOS DE GAZEBO (SLIDERS EN GUI) -->
-  <!-- ========================================== -->
+  <!-- Plugins de controladores para los sliders ya provistos -->
   <gazebo>
-  <plugin filename="libgz-sim-joint-position-controller-system.so" 
-          name="gz::sim::systems::JointPositionController">
-    <joint_name>pan_joint</joint_name>
-    <p_gain>20.0</p_gain>
-    <i_gain>1.0</i_gain>
-    <d_gain>0.1</d_gain>
-    <initial_position>0.0</initial_position>
-  </plugin>
-
-  <plugin filename="libgz-sim-joint-position-controller-system.so" 
-          name="gz::sim::systems::JointPositionController">
-    <joint_name>tilt_joint</joint_name>
-    <p_gain>20.0</p_gain>
-    <i_gain>1.0</i_gain>
-    <d_gain>0.1</d_gain>
-    <initial_position>0.0</initial_position>
-  </plugin>
-</gazebo>
-  <!-- ========================================== -->
-  <!-- SISTEMA DE CONTROL ROS 2 (COMENTADO PARA LA DEMO) -->
-  <!-- ========================================== -->
-  <!-- 
-  <ros2_control name="GazeboSystem" type="system">
-    <hardware>
-      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-    </hardware>
-
-    <joint name="pan_joint">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-
-    <joint name="tilt_joint">
-      <command_interface name="position"/>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
-      <state_interface name="effort"/>
-    </joint>
-  </ros2_control>
-
-  <gazebo>
-    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-      <parameters>$(find turret_description)/config/controllers.yaml</parameters>
+    <plugin filename="libgz-sim-joint-position-controller-system.so" name="gz::sim::systems::JointPositionController">
+      <joint_name>pan_joint</joint_name>
+      <p_gain>20.0</p_gain>
+      <i_gain>1.0</i_gain>
+      <d_gain>0.1</d_gain>
+      <initial_position>0.0</initial_position>
+    </plugin>
+    <plugin filename="libgz-sim-joint-position-controller-system.so" name="gz::sim::systems::JointPositionController">
+      <joint_name>tilt_joint</joint_name>
+      <p_gain>20.0</p_gain>
+      <i_gain>1.0</i_gain>
+      <d_gain>0.1</d_gain>
+      <initial_position>0.0</initial_position>
     </plugin>
   </gazebo>
-  -->
 
 </robot>
