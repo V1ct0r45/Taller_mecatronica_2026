@@ -58,13 +58,17 @@ def generate_launch_description():
         ]
     )
     
-    # 4. PUENTE DEL RELOJ
+    # 4. PUENTE DEL RELOJ Y CÁMARA (Mapeado al nombre de la cámara real)
     clock_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=[
             '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            # Cambiamos el destino en ROS a /camera_mipi1/image_raw
             '/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image'
+        ],
+        remappings=[
+            ('/camera/image_raw', '/camera_mipi1/image_raw')
         ],
         output='screen'
     )

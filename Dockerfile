@@ -49,7 +49,7 @@ RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor 
     libqt5serialport5 \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. Descargar e instalar SimulIDE (Descarga dinámica y extracción de AppImage interno)
+# 5. Descargar e instalar SimulIDE (AppImage extraído, sin FUSE)
 RUN SIMULIDE_URL=$(curl -sL https://launchpad.net/simulide/+download | grep -o 'href="[^"]*Lin64[^"]*\.tar\.gz"' | head -n 1 | cut -d '"' -f 2) \
     && case "$SIMULIDE_URL" in /*) SIMULIDE_URL="https://launchpad.net$SIMULIDE_URL" ;; esac \
     && echo "Descargando SimulIDE desde: $SIMULIDE_URL" \
@@ -60,7 +60,9 @@ RUN SIMULIDE_URL=$(curl -sL https://launchpad.net/simulide/+download | grep -o '
     && cd "$SIMULIDE_DIR" \
     && chmod +x simulide \
     && ./simulide --appimage-extract \
-    && ln -s "$SIMULIDE_DIR/squashfs-root/AppRun" /usr/local/bin/simulide
+    && cp -r data examples squashfs-root/usr/bin/ \
+    && printf '#!/bin/bash\nexec "%s/squashfs-root/AppRun" "$@"\n' "$SIMULIDE_DIR" > /usr/local/bin/simulide \
+    && chmod +x /usr/local/bin/simulide
 
 # 6. Instalar PlatformIO y plugin de FreeCAD
 RUN pip3 install --break-system-packages -U platformio
