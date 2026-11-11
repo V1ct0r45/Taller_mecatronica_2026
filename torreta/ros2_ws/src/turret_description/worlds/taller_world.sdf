@@ -56,5 +56,51 @@
         </visual>
       </link>
     </model>
+
+
+
+      <!-- PELOTA NARANJA: dinámica pero sin gravedad, movible por velocidad -->
+    <model name="pelota_naranja">
+      <static>false</static>
+      <pose>0 -0.8 0.3 0 0 0</pose>
+
+      <link name="link">
+        <!-- Clave: la pelota ignora la gravedad -->
+        <gravity>false</gravity>
+
+        <inertial>
+          <mass>0.1</mass>
+          <!-- Inercia de esfera sólida: I = 2/5 m r^2 = 0.0001 -->
+          <inertia>
+            <ixx>0.0001</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>0.0001</iyy><iyz>0</iyz>
+            <izz>0.0001</izz>
+          </inertia>
+        </inertial>
+
+        <collision name="collision">
+          <geometry>
+            <sphere><radius>0.05</radius></sphere>
+          </geometry>
+        </collision>
+
+        <visual name="visual">
+          <geometry>
+            <sphere><radius>0.05</radius></sphere>
+          </geometry>
+          <material>
+            <ambient>1.0 0.45 0.0 1</ambient>
+            <diffuse>1.0 0.5 0.0 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+      </link>
+
+      <!-- Permite mover la pelota publicando una velocidad en /ball/cmd_vel -->
+      <plugin filename="gz-sim-velocity-control-system"
+              name="gz::sim::systems::VelocityControl">
+        <topic>/ball/cmd_vel</topic>
+      </plugin>
+    </model>
   </world>
 </sdf>

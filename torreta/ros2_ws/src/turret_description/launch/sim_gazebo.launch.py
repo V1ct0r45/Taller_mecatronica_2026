@@ -119,6 +119,6 @@ def generate_launch_description():
         gazebo,
         spawn_entity,
         clock_bridge,
-        #delay_broadcaster_after_spawn, # <-- Descomentar para control con ros
-        #delay_controller_after_broadcaster # <-- Descomentar para control con ros
+        delay_broadcaster_after_spawn,  #<-- Descomentar para control con ros
+        delay_controller_after_broadcaster # <-- Descomentar para control con ros
     ])

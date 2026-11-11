@@ -29,6 +29,7 @@ setup(
             'target_mover = turret_pkg.target_mover:main',
             'turret_teleop = turret_pkg.turret_teleop:main',
             'arduino_bridge = turret_pkg.arduino_bridge:main',
+            'ball_teleop = turret_pkg.ball_teleop:main',
         ],
     },
 )
